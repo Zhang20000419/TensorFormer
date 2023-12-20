@@ -11,11 +11,11 @@ class CMU_MOSI_Dataset(Dataset):
     :parameter:pre_aligned:是否提前对CMU-MOSI数据集进行了对齐
     :parameter:directory:CMU-MOSI数据集的存放路径,默认为'./cmu-mosi'
     """
-    def __init__(self, pre_downloaded, pre_aligned, download_directory='.\\cmu-mosi', alignment_directory='.\\aligned-cmu-mosi'):
+    def __init__(self, pre_downloaded, pre_aligned, download_directory='.\\cmu-mosi', alignment_directory='.\\aligned-cmu-mosi', labels_directory='.\\labels-cmu-mosi'):
         # 要对齐的特征
-        visual_field = 'CMU_MOSI_VisualFacet_4.1'
+        visual_field = 'CMU_MOSI_Visual_Facet_41'
         acoustic_field = 'CMU_MOSI_COVAREP'
-        text_field = 'CMU_MOSI_TimestampedWords'
+        text_field = 'CMU_MOSI_TimestampedWordVectors'
         feature_field = [text_field, visual_field, acoustic_field]
         if not pre_downloaded:
             # 在windows上需要先将site-packages\mmsdk\mmdatasdk\computational_sequence中的
@@ -27,11 +27,18 @@ class CMU_MOSI_Dataset(Dataset):
             print('CMU-MOSI dataset has been downloaded before.\n', end='')
         if not pre_aligned:
             self.dataset = mmdatasdk.mmdataset({feature: os.path.join(download_directory, feature) + '.csd' for feature in feature_field})
-            self.dataset.align(feature_field, './aligned-cmu-mosi')
+
             def myavg(intervals, features):
                 return numpy.mean(features, axis=0)
-            self.dataset.align('glove_vectors', collapse_functions=[myavg])
+            self.dataset.align(text_field, collapse_functions=[myavg])
+            if not os.path.exists(labels_directory) or len(os.listdir(labels_directory)) == 0:
+                self.dataset.add_computational_sequences(mmdatasdk.cmu_mosi.labels, labels_directory)
+            else:
+                # 需要修改
+                self.dataset.add_computational_sequences(os.path.join(labels_directory, 'CMU_MOSI_Opinion_Labels.csd'), destination=None)
 
+            self.dataset.add_computational_sequences(mmdatasdk.cmu_mosi.labels, labels_directory)
+            self.dataset.align(feature_field, './aligned-cmu-mosi')
 
 
 
