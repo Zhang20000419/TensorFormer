@@ -46,7 +46,7 @@ class CMU_MOSI_Dataset(Dataset):
             if not os.path.exists(labels_directory) or len(os.listdir(labels_directory)) == 0:
                 self.dataset.add_computational_sequences(mmdatasdk.cmu_mosi.labels, labels_directory)
             else:
-                self.dataset.add_computational_sequences(os.path.join(labels_directory, label_field, '.csd'), destination=None)
+                self.dataset.add_computational_sequences({label_field: os.path.join(labels_directory, label_field, '.csd')}, destination=None)
             # 按照label_field对齐
             self.dataset.align(label_field, replace=True)
 
