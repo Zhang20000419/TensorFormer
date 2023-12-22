@@ -4,6 +4,7 @@ from mmsdk import mmdatasdk
 from torch.utils.data import Dataset, DataLoader
 import numpy
 
+
 class CMU_MOSI_Dataset(Dataset):
     """
     CMU-MOSI数据集的数据加载器
@@ -44,9 +45,9 @@ class CMU_MOSI_Dataset(Dataset):
             self.dataset.align(text_field, collapse_functions=[myavg])
             # 如果没有提前下载标签，就下载标签
             if not os.path.exists(labels_directory) or len(os.listdir(labels_directory)) == 0:
-                self.dataset.add_computational_sequences(mmdatasdk.cmu_mosi.labels, labels_directory)
+                self.dataset.add_computational_sequences({labels_directory: mmdatasdk.cmu_mosi.labels['Opinion Segment Labels']}, labels_directory)
             else:
-                self.dataset.add_computational_sequences({label_field: os.path.join(labels_directory, label_field, '.csd')}, destination=None)
+                self.dataset.add_computational_sequences({label_field: os.path.join(labels_directory, label_field + '.csd')}, destination=None)
             # 按照label_field对齐
             self.dataset.align(label_field, replace=True)
 
